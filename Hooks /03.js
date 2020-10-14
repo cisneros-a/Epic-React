@@ -1,71 +1,58 @@
 // Lifting state
 // http://localhost:3000/isolated/exercise/03.js
 
-import React from 'react'
+//Here we worked on Lifting State. Intitially, we have animal and name state stored in seperate components.
+//  However, if we wanted our display to include both name and animal, we would have to lift the state of
+//  animal. So we moved [animal, setAnimal] to App (the closest shared parent) and passed down the state and
+//  change function in props.
 
-function useLocalStorageState(key, defaultValue = '') {
-  //adding the function to our useState it will call the function when the
-  //  component is rendered only for the first time or it needs to be. This is
-  //  called a lazy intitialization.
-  const [state, setState] = React.useState(
-    () => window.localStorage.getItem(key) || defaultValue,
-  )
+//We then decided our display no longer needed the animal, so we reverted back to colocating the state of
+//  animal, which allows for a more maintainable application.
 
-  React.useEffect(() => {
-    window.localStorage.setItem(key, state)
-  }, [key, state])
+import React from "react";
 
-  return [state, setState]
-}
-
-function Name() {
-  const [name, setName] = useLocalStorageState('name')
-
+function Name({ name, onNameChange }) {
   return (
     <div>
       <label htmlFor="name">Name: </label>
-      <input
-        id="name"
-        value={name}
-        onChange={event => setName(event.target.value)}
-      />
+      <input id="name" value={name} onChange={onNameChange} />
     </div>
-  )
+  );
 }
 
 // 🐨 accept `animal` and `onAnimalChange` props to this component
-function FavoriteAnimal({animal, onAnimalChange}) {
-  // 💣 delete this, it's now managed by the App
+function FavoriteAnimal() {
+  const [animal, setAnimal] = React.useState("");
+
   return (
     <div>
       <label htmlFor="animal">Favorite Animal: </label>
-      <input id="animal" value={animal} onChange={onAnimalChange} />
+      <input
+        id="animal"
+        value={animal}
+        onChange={(event) => setAnimal(event.target.value)}
+      />
     </div>
-  )
+  );
 }
 
 // 🐨 uncomment this
-function Display({animal}) {
-  return <div>{`Hey, your favorite animal is: ${animal}!`}</div>
+function Display({ name }) {
+  return <div>{`Hey ${name}, you are great!`}</div>;
 }
-
-// 💣 remove this component in favor of the new one
 
 function App() {
   // 🐨 add a useState for the animal
-  const [animal, setAnimal] = useLocalStorageState('animal')
+  const [name, setName] = React.useState("");
   return (
     <form>
-      <Name />
+      <Name name={name} onNameChange={(event) => setName(event.target.value)} />
       {/* 🐨 pass the animal and onAnimalChange prop here (similar to the Name component above) */}
-      <FavoriteAnimal
-        animal={animal}
-        onAnimalChange={event => setAnimal(event.target.value)}
-      />
+      <FavoriteAnimal />
       {/* 🐨 pass the animal prop here */}
-      <Display animal={animal} />
+      <Display name={name} />
     </form>
-  )
+  );
 }
 
-export default App
+export default App;
